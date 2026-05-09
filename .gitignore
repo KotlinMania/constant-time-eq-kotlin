@@ -15,7 +15,7 @@ build/
 out/
 
 # Upstream Rust source — clone freshly when porting begins
-tmp/
+tmp/*
 !tmp/.gitkeep
 
 # AST distance reports and binaries

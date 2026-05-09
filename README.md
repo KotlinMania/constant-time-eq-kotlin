@@ -62,6 +62,7 @@ dependencies {
 ### Porting guidelines
 
 See [AGENTS.md](AGENTS.md) and [CLAUDE.md](CLAUDE.md) for translator discipline, port-lint header convention, and Rust → Kotlin idiom mapping.
+Keep the upstream Rust checkout in `tmp/constant_time_eq/` (gitignored) as the translation ground truth.
 
 ### License
 
