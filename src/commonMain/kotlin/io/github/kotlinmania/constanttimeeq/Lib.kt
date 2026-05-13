@@ -1,31 +1,17 @@
 // port-lint: source src/lib.rs
 package io.github.kotlinmania.constanttimeeq
 
-// Upstream Rust crate is `#![no_std]`. The Kotlin port likewise pulls only
-// from the Kotlin standard library — no platform I/O, no JVM-only types.
-
-// Upstream defines three platform-gated `optimizer_hide` implementations.
-// The x86 / x86_64 variant uses `core::arch::asm!("/* {0} */", inout(reg_byte) value, ...)`
-// with the `pure`, `nomem`, `nostack`, `preserves_flags` options as a no-op
-// inline-assembly barrier; the ARM / AArch64 / RISC-V variant uses the same
-// pattern with `inout(reg)` and the `asm_sub_register` lint suppression.
-// On every other architecture (and under Miri) the fallback uses
-// `core::hint::black_box` together with an `inline(never)` hint, which —
-// quoting the upstream comment — round-trips the value through the stack
-// instead of leaving it in a register, since "experimental codegen
-// backends might implement black_box as a pure identity function, without
-// the expected optimization barrier, so it's less guaranteed than inline
-// asm. For that reason, we also use the inline(never) hint, which makes
-// it harder for an optimizer to look inside this function."
-//
-// Kotlin Multiplatform exposes neither portable inline assembly nor a
-// `black_box` intrinsic across every supported target, so this file
-// keeps a single non-inlined identity function that the JVM, Native, JS,
-// and Wasm-JS back-ends will not fold across the call boundary. Like the
-// upstream fallback, it is the weakest of the three guarantees: it
-// discourages constant folding of the accumulator inside `constantTimeNe`
-// and `constantTimeNeN` but cannot promise true constant-time execution
-// on a sufficiently aggressive backend.
+// The current implementation of blackBox in the main codegen backends is similar to
+// {
+//     val result = value
+//     asm("", in(reg) &result)
+//     result
+// }
+// which round-trips the value through the stack, instead of leaving it in a register.
+// Experimental codegen backends might implement blackBox as a pure identity function,
+// without the expected optimization barrier, so it's less guaranteed than inline asm.
+// For that reason, we also keep this function non-inlined, which makes it harder for
+// an optimizer to look inside this function.
 private fun optimizerHide(value: Int): Int {
     return value
 }
