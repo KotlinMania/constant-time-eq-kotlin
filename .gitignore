@@ -1,6 +1,7 @@
 # Kotlin/Gradle build artifacts
 build/
 .gradle/
+.kotlin/
 *.class
 *.jar
 *.war
@@ -15,7 +16,7 @@ build/
 out/
 
 # Upstream Rust source — clone freshly when porting begins
-tmp/*
+tmp/
 !tmp/.gitkeep
 
 # AST distance reports and binaries
@@ -25,6 +26,7 @@ ast_distance_*.txt
 .cache/
 *.lock
 kotlin-js-store/*
+!kotlin-js-store/package.json
 !kotlin-js-store/yarn.lock
 !kotlin-js-store/wasm/
 !kotlin-js-store/wasm/yarn.lock

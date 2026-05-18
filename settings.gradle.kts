@@ -17,4 +17,3 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "constant-time-eq-kotlin"
-
