@@ -216,7 +216,11 @@ kotlin {
         }
     }
     iosX64 {
-        binaries.framework { baseName = "ConstantTimeEq"; xcf.add(this) }
+        binaries.framework {
+            baseName = "ConstantTimeEq"
+            isStatic = true
+            xcf.add(this)
+        }
     }
 
     tvosArm64 {

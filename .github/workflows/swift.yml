@@ -9,7 +9,13 @@ permissions:
 jobs:
   build:
     name: Build and Test (Swift)
-    runs-on: macos-latest
+    # Kotlin/Native 2.3.x prebuilt platform caches reference macOS 26 SDK
+    # symbols (NSCalendarIdentifierBangla, NSCalendarIdentifierGujarati,
+    # NSCalendarIdentifierVikram, etc.). macos-latest currently resolves to
+    # macos-15 with Xcode 16 / macOS 15 SDK, so `swift test` link fails with
+    # "Undefined symbols for architecture arm64" on every one of those.
+    # Pinning macos-26 supplies the SDK stubs the cache expects.
+    runs-on: macos-26
     permissions:
       contents: read
     steps:
