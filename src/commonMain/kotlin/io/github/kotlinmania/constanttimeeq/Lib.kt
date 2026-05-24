@@ -1,4 +1,4 @@
-// port-lint: source src/lib.rs
+// port-lint: source lib.rs
 package io.github.kotlinmania.constanttimeeq
 
 // The current implementation of blackBox in the main codegen backends is similar to
@@ -12,11 +12,11 @@ package io.github.kotlinmania.constanttimeeq
 // without the expected optimization barrier, so it's less guaranteed than inline asm.
 // For that reason, we also keep this function non-inlined, which makes it harder for
 // an optimizer to look inside this function.
-private fun optimizerHide(value: Int): Int {
+private fun optimizerHide(value: Byte): Byte {
     return value
 }
 
-private fun constantTimeNe(a: ByteArray, b: ByteArray): Int {
+private fun constantTimeNe(a: ByteArray, b: ByteArray): Byte {
     require(a.size == b.size)
 
     val len = a.size
@@ -27,7 +27,7 @@ private fun constantTimeNe(a: ByteArray, b: ByteArray): Int {
     }
 
     // The compare with 0 must happen outside this function.
-    return optimizerHide(tmp)
+    return optimizerHide(tmp.toByte())
 }
 
 /**
@@ -47,19 +47,19 @@ private fun constantTimeNe(a: ByteArray, b: ByteArray): Int {
  * ```
  */
 fun constantTimeEq(a: ByteArray, b: ByteArray): Boolean {
-    return a.size == b.size && constantTimeNe(a, b) == 0
+    return a.size == b.size && constantTimeNe(a, b) == 0.toByte()
 }
 
 // Fixed-size array variant.
 
-private fun constantTimeNeN(a: ByteArray, b: ByteArray, n: Int): Int {
+private fun constantTimeNeN(a: ByteArray, b: ByteArray, n: Int): Byte {
     var tmp = 0
     for (i in 0 until n) {
         tmp = tmp or ((a[i].toInt() and 0xff) xor (b[i].toInt() and 0xff))
     }
 
     // The compare with 0 must happen outside this function.
-    return optimizerHide(tmp)
+    return optimizerHide(tmp.toByte())
 }
 
 /**
@@ -74,7 +74,7 @@ private fun constantTimeNeN(a: ByteArray, b: ByteArray, n: Int): Int {
  */
 fun constantTimeEqN(a: ByteArray, b: ByteArray): Boolean {
     require(a.size == b.size)
-    return constantTimeNeN(a, b, a.size) == 0
+    return constantTimeNeN(a, b, a.size) == 0.toByte()
 }
 
 // Fixed-size variants for the most common sizes.
