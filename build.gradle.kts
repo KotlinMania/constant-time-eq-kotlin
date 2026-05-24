@@ -28,16 +28,17 @@ plugins {
 }
 
 group = "io.github.kotlinmania"
-version = "0.1.0"
+version = "0.1.1"
 
 val androidCommandLineToolsRevision = "14742923"
 val projectCompileSdk = "34"
 val projectAndroidBuildTools = "36.0.0"
 val isWindowsHost = System.getProperty("os.name").lowercase().contains("windows")
+val isMacHost = System.getProperty("os.name").lowercase().contains("mac")
 val androidSdkOsName =
     when {
         isWindowsHost -> "win"
-        System.getProperty("os.name").lowercase().contains("mac") -> "mac"
+        isMacHost -> "mac"
         System.getProperty("os.name").lowercase().contains("linux") -> "linux"
         else -> throw GradleException("Unsupported Android SDK setup OS: ${System.getProperty("os.name")}")
     }
@@ -513,6 +514,65 @@ tasks.matching { it.name == "embedSwiftExportForXcode" }.configureEach {
     }
 }
 
+val swiftExportBuildDir = layout.buildDirectory.dir("swift-test")
+
+tasks.register("swiftExportTest") {
+    group = "verification"
+    description = "Builds the Swift Export SPM package and runs the Swift test harness."
+    onlyIf {
+        if (!isMacHost) {
+            logger.lifecycle("swiftExportTest: skipped because Swift Export tests require macOS")
+        }
+        isMacHost
+    }
+
+    doLast {
+        val swiftBuildDir = swiftExportBuildDir.get().asFile
+        swiftBuildDir.mkdirs()
+        val projectDir = layout.projectDirectory.asFile
+        val gradleExecutable = layout.projectDirectory.file(if (isWindowsHost) "gradlew.bat" else "gradlew").asFile
+        val swiftExportEnvironment = mapOf(
+            "BUILT_PRODUCTS_DIR" to swiftBuildDir.absolutePath,
+            "TARGET_BUILD_DIR" to swiftBuildDir.absolutePath,
+            "SDK_NAME" to "macosx",
+            "CONFIGURATION" to "Debug",
+            "ARCHS" to "arm64",
+            "FRAMEWORKS_FOLDER_PATH" to "Frameworks",
+            "MACOSX_DEPLOYMENT_TARGET" to "14.0",
+            "DEPLOYMENT_TARGET_SETTING_NAME" to "MACOSX_DEPLOYMENT_TARGET",
+        )
+
+        val embedResult = androidSdkExecOperations.exec {
+            workingDir(projectDir)
+            commandLine(
+                gradleExecutable.absolutePath,
+                "embedSwiftExportForXcode",
+                "--no-configuration-cache",
+                "--no-daemon",
+                "--console=plain",
+            )
+            environment(swiftExportEnvironment)
+            isIgnoreExitValue = true
+        }
+        if (embedResult.exitValue != 0) {
+            throw GradleException("Swift Export embed failed with exit code ${embedResult.exitValue}")
+        }
+
+        val swiftResult = androidSdkExecOperations.exec {
+            workingDir(layout.projectDirectory.dir("swift-test-harness").asFile)
+            commandLine("swift", "test")
+            isIgnoreExitValue = true
+        }
+        if (swiftResult.exitValue != 0) {
+            throw GradleException("Swift test harness failed with exit code ${swiftResult.exitValue}")
+        }
+    }
+}
+
+tasks.named("test") {
+    dependsOn("swiftExportTest")
+}
+
 val fullTargetBuildTasks = listOf(
     "compileAndroidMain",
     "compileAndroidHostTest",
@@ -645,6 +705,7 @@ val fullTargetBuildTasks = listOf(
 
 tasks.named("build") {
     dependsOn(fullTargetBuildTasks)
+    dependsOn("swiftExportTest")
 }
 
 afterEvaluate {

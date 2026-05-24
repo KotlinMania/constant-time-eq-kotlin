@@ -3,6 +3,7 @@ package io.github.kotlinmania.constanttimeeq
 
 import kotlin.test.Test
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class CountInstructionsTest {
@@ -92,5 +93,41 @@ class CountInstructionsTest {
     @Test
     fun countInstructionsTestN64() {
         countInstructionsTestN(64)
+    }
+
+    @Test
+    fun countInstructionsTestVariable() {
+        fun variableTimeEq(a: ByteArray, b: ByteArray): Pair<Boolean, Int> {
+            if (a.size != b.size) {
+                return false to 0
+            }
+
+            var comparisons = 0
+            for (index in a.indices) {
+                comparisons += 1
+                if (a[index] != b[index]) {
+                    return false to comparisons
+                }
+            }
+
+            return true to comparisons
+        }
+
+        val size = 64
+        val left = ByteArray(size) { 'A'.code.toByte() }
+        val right = ByteArray(size) { 'B'.code.toByte() }
+
+        val nearStart = right.copyOf()
+        nearStart[0] = 'A'.code.toByte()
+        val short = variableTimeEq(left, nearStart)
+
+        val nearEnd = left.copyOf()
+        nearEnd[size - 1] = 'B'.code.toByte()
+        val long = variableTimeEq(left, nearEnd)
+
+        assertFalse(short.first)
+        assertFalse(long.first)
+        assertNotEquals(short.second, long.second)
+        assertTrue(variableTimeEq(left, left.copyOf()).first)
     }
 }
