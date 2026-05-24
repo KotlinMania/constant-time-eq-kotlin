@@ -38,7 +38,7 @@ at your option.
 
 ```kotlin
 dependencies {
-    implementation("io.github.kotlinmania:constant-time-eq-kotlin:0.1.0")
+    implementation("io.github.kotlinmania:constant-time-eq-kotlin:0.1.1")
 }
 ```
 
@@ -47,6 +47,7 @@ dependencies {
 ```bash
 ./gradlew build
 ./gradlew test
+./gradlew swiftExportTest
 ```
 
 ### Targets
