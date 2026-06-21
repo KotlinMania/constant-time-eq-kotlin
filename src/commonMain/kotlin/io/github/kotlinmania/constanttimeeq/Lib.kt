@@ -12,9 +12,7 @@ package io.github.kotlinmania.constanttimeeq
 // without the expected optimization barrier, so it's less guaranteed than inline asm.
 // For that reason, we also keep this function non-inlined, which makes it harder for
 // an optimizer to look inside this function.
-private fun optimizerHide(value: Byte): Byte {
-    return value
-}
+private fun optimizerHide(value: Byte): Byte = value
 
 private fun constantTimeNe(a: ByteArray, b: ByteArray): Byte {
     require(a.size == b.size)
@@ -46,9 +44,8 @@ private fun constantTimeNe(a: ByteArray, b: ByteArray): Byte {
  * constantTimeEq("foo".encodeToByteArray(), "quux".encodeToByteArray()) // false
  * ```
  */
-fun constantTimeEq(a: ByteArray, b: ByteArray): Boolean {
-    return a.size == b.size && constantTimeNe(a, b) == 0.toByte()
-}
+fun constantTimeEq(a: ByteArray, b: ByteArray): Boolean =
+    a.size == b.size && constantTimeNe(a, b) == 0.toByte()
 
 // Fixed-size array variant.
 
