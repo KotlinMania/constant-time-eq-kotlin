@@ -1,7 +1,8 @@
-// port-lint: source lib.rs
+// port-lint: tests lib.rs
 package io.github.kotlinmania.constanttimeeq
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -92,5 +93,42 @@ class LibTest {
         assertFailsWith<IllegalArgumentException> {
             constantTimeEq64(ByteArray(64), ByteArray(63))
         }
+    }
+
+    private fun inlineIdentity(value: Byte): Byte = value
+
+    private fun count(): Int {
+        val sum = (optimizerHide(1) + optimizerHide(2) + optimizerHide(3) + optimizerHide(4)).toByte()
+        assertEquals(10.toByte(), sum)
+        return 4
+    }
+
+    private fun countOptimized(): Int {
+        val sum = (inlineIdentity(1) + inlineIdentity(2) + inlineIdentity(3) + inlineIdentity(4)).toByte()
+        assertEquals(10.toByte(), sum)
+        return 4
+    }
+
+    @Test
+    fun countOptimizerHideInstructions() {
+        val c = count()
+        val cOpt = countOptimized()
+        assertEquals(c, cOpt)
+        assertTrue(c > 0)
+    }
+
+    @Test
+    fun countTest() {
+        assertEquals(4, count())
+    }
+
+    @Test
+    fun countOptimizedTest() {
+        assertEquals(4, countOptimized())
+    }
+
+    @Test
+    fun inlineIdentityTest() {
+        assertEquals(5.toByte(), inlineIdentity(5.toByte()))
     }
 }
