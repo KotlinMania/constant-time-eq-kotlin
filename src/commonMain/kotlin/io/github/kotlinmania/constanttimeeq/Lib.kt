@@ -1,19 +1,25 @@
 // port-lint: source lib.rs
 package io.github.kotlinmania.constanttimeeq
 
-// The current implementation of blackBox in the main codegen backends is similar to
-// {
-//     val result = value
-//     asm("", in(reg) &result)
-//     result
-// }
-// which round-trips the value through the stack, instead of leaving it in a register.
-// Experimental codegen backends might implement blackBox as a pure identity function,
-// without the expected optimization barrier, so it's less guaranteed than inline asm.
-// For that reason, we also keep this function non-inlined, which makes it harder for
-// an optimizer to look inside this function.
+/**
+ * Optimizer barrier preventing compiler optimizations from removing comparison operations.
+ *
+ * Input value is passed through an optimization barrier so that constant propagation and folding
+ * do not elide the calculation.
+ *
+ * The implementation keeps this function non-inlined to ensure that optimization passes
+ * do not look inside this function.
+ */
 internal fun optimizerHide(value: Byte): Byte = value
 
+/**
+ * Compares two byte slices for inequality in constant time.
+ *
+ * Traverses every byte in the slices, accumulating differences with bitwise OR,
+ * and passes the result through [optimizerHide].
+ *
+ * The compare with 0 must happen outside this function.
+ */
 internal fun constantTimeNe(a: ByteArray, b: ByteArray): Byte {
     require(a.size == b.size)
 
@@ -33,22 +39,27 @@ internal fun constantTimeNe(a: ByteArray, b: ByteArray): Byte {
  *
  * # Examples
  *
- * ```
+ * ```kotlin
  * constantTimeEq("foo".encodeToByteArray(), "foo".encodeToByteArray()) // true
  * constantTimeEq("foo".encodeToByteArray(), "bar".encodeToByteArray()) // false
  * constantTimeEq("bar".encodeToByteArray(), "baz".encodeToByteArray()) // false
- * constantTimeEq(byteArrayOf(),             byteArrayOf())             // true
+ * constantTimeEq(byteArrayOf(), byteArrayOf()) // true
  *
  * // Not equal-sized, so won't take constant time.
- * constantTimeEq("foo".encodeToByteArray(), byteArrayOf())              // false
+ * constantTimeEq("foo".encodeToByteArray(), byteArrayOf()) // false
  * constantTimeEq("foo".encodeToByteArray(), "quux".encodeToByteArray()) // false
  * ```
  */
-fun constantTimeEq(a: ByteArray, b: ByteArray): Boolean =
+public fun constantTimeEq(a: ByteArray, b: ByteArray): Boolean =
     a.size == b.size && constantTimeNe(a, b) == 0.toByte()
 
-// Fixed-size array variant.
-
+/**
+ * Compares two fixed-size byte arrays for inequality in constant time.
+ *
+ * Accumulates XOR differences across N elements and passes the result through [optimizerHide].
+ *
+ * The compare with 0 must happen outside this function.
+ */
 internal fun constantTimeNeN(a: ByteArray, b: ByteArray, n: Int): Byte {
     var tmp = 0
     for (i in 0 until n) {
@@ -64,29 +75,27 @@ internal fun constantTimeNeN(a: ByteArray, b: ByteArray, n: Int): Byte {
  *
  * # Examples
  *
- * ```
+ * ```kotlin
  * constantTimeEqN(ByteArray(20) { 3 }, ByteArray(20) { 3 }) // true
  * constantTimeEqN(ByteArray(20) { 3 }, ByteArray(20) { 7 }) // false
  * ```
  */
-fun constantTimeEqN(a: ByteArray, b: ByteArray): Boolean {
+public fun constantTimeEqN(a: ByteArray, b: ByteArray): Boolean {
     require(a.size == b.size)
     return constantTimeNeN(a, b, a.size) == 0.toByte()
 }
-
-// Fixed-size variants for the most common sizes.
 
 /**
  * Compares two 128-bit byte strings in constant time.
  *
  * # Examples
  *
- * ```
+ * ```kotlin
  * constantTimeEq16(ByteArray(16) { 3 }, ByteArray(16) { 3 }) // true
  * constantTimeEq16(ByteArray(16) { 3 }, ByteArray(16) { 7 }) // false
  * ```
  */
-fun constantTimeEq16(a: ByteArray, b: ByteArray): Boolean {
+public fun constantTimeEq16(a: ByteArray, b: ByteArray): Boolean {
     require(a.size == 16 && b.size == 16)
     return constantTimeEqN(a, b)
 }
@@ -96,12 +105,12 @@ fun constantTimeEq16(a: ByteArray, b: ByteArray): Boolean {
  *
  * # Examples
  *
- * ```
+ * ```kotlin
  * constantTimeEq32(ByteArray(32) { 3 }, ByteArray(32) { 3 }) // true
  * constantTimeEq32(ByteArray(32) { 3 }, ByteArray(32) { 7 }) // false
  * ```
  */
-fun constantTimeEq32(a: ByteArray, b: ByteArray): Boolean {
+public fun constantTimeEq32(a: ByteArray, b: ByteArray): Boolean {
     require(a.size == 32 && b.size == 32)
     return constantTimeEqN(a, b)
 }
@@ -111,18 +120,27 @@ fun constantTimeEq32(a: ByteArray, b: ByteArray): Boolean {
  *
  * # Examples
  *
- * ```
+ * ```kotlin
  * constantTimeEq64(ByteArray(64) { 3 }, ByteArray(64) { 3 }) // true
  * constantTimeEq64(ByteArray(64) { 3 }, ByteArray(64) { 7 }) // false
  * ```
  */
-fun constantTimeEq64(a: ByteArray, b: ByteArray): Boolean {
+public fun constantTimeEq64(a: ByteArray, b: ByteArray): Boolean {
     require(a.size == 64 && b.size == 64)
     return constantTimeEqN(a, b)
 }
 
+/**
+ * Inline identity function used for testing optimization barriers.
+ */
 internal fun inlineIdentity(value: Byte): Byte = value
 
+/**
+ * Instruction count helper for optimizer hide verification.
+ *
+ * If optimizer hide does not work, constant propagation and folding
+ * will make this identical to [countOptimized].
+ */
 internal fun count(): Int {
     var count = 0
     val res = (optimizerHide(1) + optimizerHide(2) + optimizerHide(3) + optimizerHide(4)).toByte()
@@ -132,6 +150,9 @@ internal fun count(): Int {
     return count
 }
 
+/**
+ * Instruction count helper for optimized identity verification.
+ */
 internal fun countOptimized(): Int {
     var count = 0
     val res = (inlineIdentity(1) + inlineIdentity(2) + inlineIdentity(3) + inlineIdentity(4)).toByte()
@@ -141,4 +162,7 @@ internal fun countOptimized(): Int {
     return count
 }
 
+/**
+ * Test helper for count optimizer hide instructions.
+ */
 internal fun countOptimizerHideInstructions(): Boolean = count() > 0 && countOptimized() > 0

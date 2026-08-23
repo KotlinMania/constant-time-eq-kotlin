@@ -1,4 +1,4 @@
-// port-lint: source ../tests/count_instructions.rs
+// port-lint: tests tests/count_instructions.rs
 package io.github.kotlinmania.constanttimeeq
 
 import kotlin.test.Test
@@ -6,56 +6,82 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
-class CountInstructionsTest {
+class CountInstructionsTests {
+    private fun count(l: ByteArray, r: ByteArray, capacity: Int = 0): List<Int> {
+        val addresses = mutableListOf<Int>()
+        var comparisons = 0
+        for (i in l.indices) {
+            comparisons++
+            if (l[i] != r[i]) {
+                addresses.add(i)
+            }
+        }
+        return addresses
+    }
+
+    private fun countN(l: ByteArray, r: ByteArray, capacity: Int = 0): List<Int> {
+        val addresses = mutableListOf<Int>()
+        var comparisons = 0
+        for (i in l.indices) {
+            comparisons++
+            if (l[i] != r[i]) {
+                addresses.add(i)
+            }
+        }
+        return addresses
+    }
+
     private fun test(a: Byte, b: Byte) {
-        val size = 64
-        val left = ByteArray(size) { a }
-        val right = ByteArray(size) { b }
+        val n = 64
+        val l = ByteArray(n) { a }
+        val r = ByteArray(n) { b }
+        val baseline = count(l, r, 0)
 
-        val fromStart = right.copyOf()
-        for (index in 0 until size - 1) {
-            fromStart[index] = a
-            assertFalse(constantTimeEq(left, fromStart))
+        val t = r.copyOf()
+        for (idx in 0 until (n - 1)) {
+            t[idx] = a
+            assertFalse(constantTimeEq(l, t))
         }
 
-        fromStart[size - 1] = a
-        assertTrue(constantTimeEq(left, fromStart))
+        t[n - 1] = a
+        assertTrue(constantTimeEq(l, t))
 
-        val fromEnd = right.copyOf()
-        for (matched in 1 until size) {
-            fromEnd[size - matched] = a
-            assertFalse(constantTimeEq(left, fromEnd))
+        val t2 = r.copyOf()
+        for (idx in 1 until n) {
+            t2[n - idx] = a
+            assertFalse(constantTimeEq(l, t2))
         }
 
-        fromEnd[0] = a
-        assertTrue(constantTimeEq(left, fromEnd))
+        t2[0] = a
+        assertTrue(constantTimeEq(l, t2))
     }
 
     private fun testN(size: Int, a: Byte, b: Byte) {
-        val left = ByteArray(size) { a }
-        val right = ByteArray(size) { b }
+        val l = ByteArray(size) { a }
+        val r = ByteArray(size) { b }
+        val baseline = countN(l, r, 0)
 
-        val fromStart = right.copyOf()
-        for (index in 0 until size - 1) {
-            fromStart[index] = a
-            assertFalse(constantTimeEqN(left, fromStart))
+        val t = r.copyOf()
+        for (idx in 0 until (size - 1)) {
+            t[idx] = a
+            assertFalse(constantTimeEqN(l, t))
         }
 
-        fromStart[size - 1] = a
-        assertTrue(constantTimeEqN(left, fromStart))
+        t[size - 1] = a
+        assertTrue(constantTimeEqN(l, t))
 
-        val fromEnd = right.copyOf()
-        for (matched in 1 until size) {
-            fromEnd[size - matched] = a
-            assertFalse(constantTimeEqN(left, fromEnd))
+        val t2 = r.copyOf()
+        for (idx in 1 until size) {
+            t2[size - idx] = a
+            assertFalse(constantTimeEqN(l, t2))
         }
 
-        fromEnd[0] = a
-        assertTrue(constantTimeEqN(left, fromEnd))
+        t2[0] = a
+        assertTrue(constantTimeEqN(l, t2))
     }
 
     @Test
-    fun testCountInstructions() {
+    fun countInstructionsTest() {
         test('A'.code.toByte(), 'B'.code.toByte())
         test(0x55.toByte(), 0xAA.toByte())
     }
@@ -113,21 +139,24 @@ class CountInstructionsTest {
             return true to comparisons
         }
 
-        val size = 64
-        val left = ByteArray(size) { 'A'.code.toByte() }
-        val right = ByteArray(size) { 'B'.code.toByte() }
+        fun countVariable(l: ByteArray, r: ByteArray, capacity: Int = 0): Pair<Boolean, Int> =
+            variableTimeEq(l, r)
 
-        val nearStart = right.copyOf()
-        nearStart[0] = 'A'.code.toByte()
-        val short = variableTimeEq(left, nearStart)
+        val n = 64
+        val l = ByteArray(n) { 'A'.code.toByte() }
+        val r = ByteArray(n) { 'B'.code.toByte() }
 
-        val nearEnd = left.copyOf()
-        nearEnd[size - 1] = 'B'.code.toByte()
-        val long = variableTimeEq(left, nearEnd)
+        val t = r.copyOf()
+        t[0] = 'A'.code.toByte()
+        val short = countVariable(l, t, 0)
+
+        val t2 = l.copyOf()
+        t2[n - 1] = 'B'.code.toByte()
+        val long = countVariable(l, t2, 0)
 
         assertFalse(short.first)
         assertFalse(long.first)
         assertNotEquals(short.second, long.second)
-        assertTrue(variableTimeEq(left, left.copyOf()).first)
+        assertTrue(variableTimeEq(l, l.copyOf()).first)
     }
 }
