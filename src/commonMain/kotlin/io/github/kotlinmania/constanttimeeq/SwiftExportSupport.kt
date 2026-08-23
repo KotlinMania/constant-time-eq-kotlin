@@ -1,4 +1,3 @@
-// port-lint: ignore
 package io.github.kotlinmania.constanttimeeq
 
 // ByteArray construction helpers for the exported Swift API test harness.
