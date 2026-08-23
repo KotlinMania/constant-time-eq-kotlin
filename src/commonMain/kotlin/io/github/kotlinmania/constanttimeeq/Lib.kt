@@ -12,9 +12,9 @@ package io.github.kotlinmania.constanttimeeq
 // without the expected optimization barrier, so it's less guaranteed than inline asm.
 // For that reason, we also keep this function non-inlined, which makes it harder for
 // an optimizer to look inside this function.
-private fun optimizerHide(value: Byte): Byte = value
+internal fun optimizerHide(value: Byte): Byte = value
 
-private fun constantTimeNe(a: ByteArray, b: ByteArray): Byte {
+internal fun constantTimeNe(a: ByteArray, b: ByteArray): Byte {
     require(a.size == b.size)
 
     val len = a.size
@@ -49,7 +49,7 @@ fun constantTimeEq(a: ByteArray, b: ByteArray): Boolean =
 
 // Fixed-size array variant.
 
-private fun constantTimeNeN(a: ByteArray, b: ByteArray, n: Int): Byte {
+internal fun constantTimeNeN(a: ByteArray, b: ByteArray, n: Int): Byte {
     var tmp = 0
     for (i in 0 until n) {
         tmp = tmp or ((a[i].toInt() and 0xff) xor (b[i].toInt() and 0xff))
@@ -120,3 +120,25 @@ fun constantTimeEq64(a: ByteArray, b: ByteArray): Boolean {
     require(a.size == 64 && b.size == 64)
     return constantTimeEqN(a, b)
 }
+
+internal fun inlineIdentity(value: Byte): Byte = value
+
+internal fun count(): Int {
+    var count = 0
+    val res = (optimizerHide(1) + optimizerHide(2) + optimizerHide(3) + optimizerHide(4)).toByte()
+    if (res == 10.toByte()) {
+        count += 1
+    }
+    return count
+}
+
+internal fun countOptimized(): Int {
+    var count = 0
+    val res = (inlineIdentity(1) + inlineIdentity(2) + inlineIdentity(3) + inlineIdentity(4)).toByte()
+    if (res == 10.toByte()) {
+        count += 1
+    }
+    return count
+}
+
+internal fun countOptimizerHideInstructions(): Boolean = count() > 0 && countOptimized() > 0

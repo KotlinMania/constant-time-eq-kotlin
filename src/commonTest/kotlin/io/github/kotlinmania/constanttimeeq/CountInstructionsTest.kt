@@ -55,7 +55,7 @@ class CountInstructionsTest {
     }
 
     @Test
-    fun countInstructionsTest() {
+    fun testCountInstructions() {
         test('A'.code.toByte(), 'B'.code.toByte())
         test(0x55.toByte(), 0xAA.toByte())
     }
