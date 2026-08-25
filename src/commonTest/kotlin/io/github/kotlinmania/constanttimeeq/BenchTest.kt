@@ -31,4 +31,14 @@ class BenchTest {
             assertTrue(constantTimeEq(a, same), "Identical slices of size $size should be equal")
         }
     }
+
+    @Test
+    fun benchArray() {
+        benchArrayEquivalence()
+    }
+
+    @Test
+    fun benchSlice() {
+        benchSliceEquivalence()
+    }
 }
