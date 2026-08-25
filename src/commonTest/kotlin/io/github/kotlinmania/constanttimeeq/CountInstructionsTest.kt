@@ -7,6 +7,10 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class CountInstructionsTests {
+    companion object {
+        private const val N: Int = 64
+    }
+
     private fun count(l: ByteArray, r: ByteArray, capacity: Int = 0): List<Int> {
         val addresses = mutableListOf<Int>()
         var comparisons = 0
@@ -32,23 +36,22 @@ class CountInstructionsTests {
     }
 
     private fun test(a: Byte, b: Byte) {
-        val n = 64
-        val l = ByteArray(n) { a }
-        val r = ByteArray(n) { b }
+        val l = ByteArray(N) { a }
+        val r = ByteArray(N) { b }
         val baseline = count(l, r, 0)
 
         val t = r.copyOf()
-        for (idx in 0 until (n - 1)) {
+        for (idx in 0 until (N - 1)) {
             t[idx] = a
             assertFalse(constantTimeEq(l, t))
         }
 
-        t[n - 1] = a
+        t[N - 1] = a
         assertTrue(constantTimeEq(l, t))
 
         val t2 = r.copyOf()
-        for (idx in 1 until n) {
-            t2[n - idx] = a
+        for (idx in 1 until N) {
+            t2[N - idx] = a
             assertFalse(constantTimeEq(l, t2))
         }
 
@@ -142,16 +145,15 @@ class CountInstructionsTests {
         fun countVariable(l: ByteArray, r: ByteArray, capacity: Int = 0): Pair<Boolean, Int> =
             variableTimeEq(l, r)
 
-        val n = 64
-        val l = ByteArray(n) { 'A'.code.toByte() }
-        val r = ByteArray(n) { 'B'.code.toByte() }
+        val l = ByteArray(N) { 'A'.code.toByte() }
+        val r = ByteArray(N) { 'B'.code.toByte() }
 
         val t = r.copyOf()
         t[0] = 'A'.code.toByte()
         val short = countVariable(l, t, 0)
 
         val t2 = l.copyOf()
-        t2[n - 1] = 'B'.code.toByte()
+        t2[N - 1] = 'B'.code.toByte()
         val long = countVariable(l, t2, 0)
 
         assertFalse(short.first)
