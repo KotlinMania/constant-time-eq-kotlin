@@ -1,4 +1,4 @@
-// port-lint: source lib.rs
+// port-lint: source constant_time_eq/src/lib.rs
 package io.github.kotlinmania.constanttimeeq
 
 /**

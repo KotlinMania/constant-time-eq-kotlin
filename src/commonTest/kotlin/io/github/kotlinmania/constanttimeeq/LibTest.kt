@@ -1,4 +1,4 @@
-// port-lint: tests lib.rs
+// port-lint: tests constant_time_eq/src/lib.rs
 package io.github.kotlinmania.constanttimeeq
 
 import kotlin.test.Test
