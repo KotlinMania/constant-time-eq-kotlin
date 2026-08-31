@@ -1,4 +1,4 @@
-// port-lint: source constant_time_eq/src/lib.rs
+// port-lint: source lib.rs
 package io.github.kotlinmania.constanttimeeq
 
 /**
@@ -129,40 +129,3 @@ public fun constantTimeEq64(a: ByteArray, b: ByteArray): Boolean {
     require(a.size == 64 && b.size == 64)
     return constantTimeEqN(a, b)
 }
-
-/**
- * Inline identity function used for testing optimization barriers.
- */
-internal fun inlineIdentity(value: Byte): Byte = value
-
-/**
- * Instruction count helper for optimizer hide verification.
- *
- * If optimizer hide does not work, constant propagation and folding
- * will make this identical to [countOptimized].
- */
-internal fun count(): Int {
-    var count = 0
-    val res = (optimizerHide(1) + optimizerHide(2) + optimizerHide(3) + optimizerHide(4)).toByte()
-    if (res == 10.toByte()) {
-        count += 1
-    }
-    return count
-}
-
-/**
- * Instruction count helper for optimized identity verification.
- */
-internal fun countOptimized(): Int {
-    var count = 0
-    val res = (inlineIdentity(1) + inlineIdentity(2) + inlineIdentity(3) + inlineIdentity(4)).toByte()
-    if (res == 10.toByte()) {
-        count += 1
-    }
-    return count
-}
-
-/**
- * Test helper for count optimizer hide instructions.
- */
-internal fun countOptimizerHideInstructions(): Boolean = count() > 0 && countOptimized() > 0
