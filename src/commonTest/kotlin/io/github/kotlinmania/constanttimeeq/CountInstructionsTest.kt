@@ -1,4 +1,4 @@
-// port-lint: tests constant_time_eq/tests/count_instructions.rs
+// port-lint: source constant_time_eq/tests/count_instructions.rs
 package io.github.kotlinmania.constanttimeeq
 
 import kotlin.test.Test
