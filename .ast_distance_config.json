@@ -2,7 +2,7 @@
   "type": "port",
   "name": "constant-time-eq-kotlin",
   "source": {
-    "path": "tmp/constant_time_eq/src",
+    "path": "tmp",
     "lang": "rust"
   },
   "target": {
