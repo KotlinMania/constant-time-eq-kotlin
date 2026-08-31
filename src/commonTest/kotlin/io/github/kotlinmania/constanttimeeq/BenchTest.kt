@@ -1,4 +1,4 @@
-// port-lint: tests bench.rs
+// port-lint: tests constant_time_eq/benches/bench.rs
 package io.github.kotlinmania.constanttimeeq
 
 import kotlin.test.Test

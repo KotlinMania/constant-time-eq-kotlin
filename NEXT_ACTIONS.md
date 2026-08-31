@@ -4,13 +4,13 @@ Based on AST analysis, here are the concrete next steps.
 
 ## Summary
 
-- **Files Present:** 1/1 (100.0%)
-- **Function parity:** 12/12 matched (target 26) — 100.0%
+- **Files Present:** 1/3 (33.3%)
+- **Function parity:** 12/29 matched (target 26) — 41.4%
 - **Class/type parity:** 0/0 matched (target 1) — N/A
-- **Combined symbol parity:** 12/12 matched (target 27) — 100.0%
-- **Average inline-code cosine:** 0.56 (function body across 1 matched files)
-- **Average documentation cosine:** 0.48 (doc text across 1 matched files)
-- **Cheat-zeroed Files:** 0
+- **Combined symbol parity:** 12/29 matched (target 27) — 41.4%
+- **Average inline-code cosine:** 0.00 (function body across 0 matched files)
+- **Average documentation cosine:** 0.00 (doc text across 0 matched files)
+- **Cheat-zeroed Files:** 1
 - **Critical Issues:** 1 files with <0.60 function similarity
 
 ## Priority 1: Fix Incomplete High-Dependency Files
@@ -27,12 +27,12 @@ No missing high-value files detected.
 
 Every matched file is listed below with function and type symbol parity.
 
-### 1. lib
+### 1. constant_time_eq.lib
 
-- **Target:** `constanttimeeq.Lib`
-- **Similarity:** 0.56
+- **Target:** `constanttimeeq.Lib [STUB]`
+- **Similarity:** 0.00
 - **Dependents:** 0
-- **Priority Score:** 1204.4
+- **Priority Score:** 1210.0
 - **Functions:** 12/12 matched (target 26)
 - **Missing functions:** _none_
 - **Types:** 0/0 matched (target 1)
