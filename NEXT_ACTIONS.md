@@ -4,10 +4,10 @@ Based on AST analysis, here are the concrete next steps.
 
 ## Summary
 
-- **Files Present:** 1/1 (100.0%)
-- **Function parity:** 12/12 matched (target 26) — 100.0%
+- **Files Present:** 1/3 (33.3%)
+- **Function parity:** 12/29 matched (target 26) — 41.4%
 - **Class/type parity:** 0/0 matched (target 1) — N/A
-- **Combined symbol parity:** 12/12 matched (target 27) — 100.0%
+- **Combined symbol parity:** 12/29 matched (target 27) — 41.4%
 - **Average inline-code cosine:** 0.54 (function body across 1 matched files)
 - **Average documentation cosine:** 0.48 (doc text across 1 matched files)
 - **Cheat-zeroed Files:** 0
@@ -29,7 +29,7 @@ Every matched file is listed below with function and type symbol parity.
 
 ### 1. lib
 
-- **Target:** `constanttimeeq.Lib`
+- **Target:** `constanttimeeq.Lib [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.54
 - **Dependents:** 0
 - **Priority Score:** 1204.6
@@ -38,6 +38,11 @@ Every matched file is listed below with function and type symbol parity.
 - **Types:** 0/0 matched (target 1)
 - **Missing types:** _none_
 - **Tests:** 4/4 matched
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `lib.rs` vs expected `lib.rs`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `tests:lib.rs` vs expected `lib.rs`
+- **Proposed provenance header:** `// port-lint: source lib.rs` (current: `// port-lint: source lib.rs`)
+- **Proposed provenance header:** `// port-lint: tests lib.rs` (current: `// port-lint: tests lib.rs`)
+- **Lint issues:** 2
 
 ## Success Criteria
 
