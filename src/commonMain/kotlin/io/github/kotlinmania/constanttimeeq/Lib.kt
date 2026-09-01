@@ -1,4 +1,4 @@
-// port-lint: source constant_time_eq/src/lib.rs
+// port-lint: source lib.rs
 package io.github.kotlinmania.constanttimeeq
 
 /**
@@ -10,7 +10,10 @@ package io.github.kotlinmania.constanttimeeq
  * The implementation keeps this function non-inlined to ensure that optimization passes
  * do not look inside this function.
  */
-internal fun optimizerHide(value: Byte): Byte = value
+internal fun optimizerHide(value: Byte): Byte {
+    val masked = value.toInt() and 0xFF
+    return (masked xor 0).toByte()
+}
 
 /**
  * Compares two byte slices for inequality in constant time.
