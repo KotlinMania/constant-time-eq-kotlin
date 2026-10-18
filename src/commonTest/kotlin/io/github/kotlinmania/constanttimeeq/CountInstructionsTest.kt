@@ -12,10 +12,8 @@ class CountInstructionsTests {
     }
 
     private fun count(l: ByteArray, r: ByteArray, capacity: Int = 0): List<Int> {
-        val addresses = mutableListOf<Int>()
-        var comparisons = 0
+        val addresses = ArrayList<Int>(capacity)
         for (i in l.indices) {
-            comparisons++
             if (l[i] != r[i]) {
                 addresses.add(i)
             }
@@ -24,10 +22,8 @@ class CountInstructionsTests {
     }
 
     private fun countN(l: ByteArray, r: ByteArray, capacity: Int = 0): List<Int> {
-        val addresses = mutableListOf<Int>()
-        var comparisons = 0
+        val addresses = ArrayList<Int>(capacity)
         for (i in l.indices) {
-            comparisons++
             if (l[i] != r[i]) {
                 addresses.add(i)
             }
