@@ -1,4 +1,3 @@
-// port-lint: tests lib.rs
 package io.github.kotlinmania.constanttimeeq
 
 import kotlin.test.Test
@@ -44,7 +43,7 @@ internal fun countOptimized(): Int {
  */
 internal fun countOptimizerHideInstructions(): Boolean = count() > 0 && countOptimized() > 0
 
-class LibTest {
+class ConstantTimeEqTest {
     @Test
     fun constantTimeEqDocExamples() {
         assertTrue(constantTimeEq("foo".encodeToByteArray(), "foo".encodeToByteArray()))
