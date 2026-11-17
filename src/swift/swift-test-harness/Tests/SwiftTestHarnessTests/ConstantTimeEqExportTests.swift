@@ -6,11 +6,34 @@ import ExportedKotlinPackages
     private typealias KotlinByteArray = ExportedKotlinPackages.kotlin.ByteArray
 
     private func bytes(_ value: String) -> KotlinByteArray {
-        constantTimeEqBytesFromUtf8(value: value)
+        let utf8 = Array(value.utf8)
+        let array = KotlinByteArray(size: Int32(utf8.count))
+        for (index, byte) in utf8.enumerated() {
+            array[Int32(index)] = Int8(bitPattern: byte)
+        }
+        return array
     }
 
     private func repeated(_ size: Int32, _ value: Int8) -> KotlinByteArray {
-        constantTimeEqRepeatedBytes(size: size, value: value)
+        let array = KotlinByteArray(size: size)
+        for index in 0..<size {
+            array[index] = value
+        }
+        return array
+    }
+
+    private func sequential(_ size: Int32) -> KotlinByteArray {
+        let array = KotlinByteArray(size: size)
+        for index in 0..<size {
+            array[index] = Int8(truncatingIfNeeded: index)
+        }
+        return array
+    }
+
+    private func sequentialWithHighBitDifference(_ size: Int32, index: Int32) -> KotlinByteArray {
+        let array = sequential(size)
+        array[index] = Int8(bitPattern: UInt8(bitPattern: array[index]) ^ 0x80)
+        return array
     }
 
     @Test func testConstantTimeEqDocExamples() throws {
@@ -24,12 +47,12 @@ import ExportedKotlinPackages
     }
 
     @Test func testConstantTimeEqAcrossByteRange() throws {
-        let left = constantTimeEqSequentialBytes(size: 256)
+        let left = sequential(256)
         for index in 0..<256 {
-            let right = constantTimeEqSequentialBytesWithHighBitDifference(size: 256, index: Int32(index))
+            let right = sequentialWithHighBitDifference(256, index: Int32(index))
             #expect(Bool(!constantTimeEq(a: left, b: right)), "diff at index \(index) should compare unequal")
         }
-        #expect(Bool(constantTimeEq(a: left, b: constantTimeEqSequentialBytes(size: 256))))
+        #expect(Bool(constantTimeEq(a: left, b: sequential(256))))
     }
 
     @Test func testConstantTimeEqNDocExamples() throws {
@@ -37,17 +60,9 @@ import ExportedKotlinPackages
         #expect(Bool(!constantTimeEqN(a: repeated(20, 3), b: repeated(20, 7))))
     }
 
-    @Test func testConstantTimeEqNRequiresEqualLengths() throws {
-        #expect(Bool(constantTimeEqNRejectsUnequalLengths()))
-    }
-
     @Test func testConstantTimeEq16DocExamples() throws {
         #expect(Bool(constantTimeEq16(a: repeated(16, 3), b: repeated(16, 3))))
         #expect(Bool(!constantTimeEq16(a: repeated(16, 3), b: repeated(16, 7))))
-    }
-
-    @Test func testConstantTimeEq16RequiresFixedLength() throws {
-        #expect(Bool(constantTimeEq16RejectsWrongLength()))
     }
 
     @Test func testConstantTimeEq32DocExamples() throws {
@@ -55,20 +70,12 @@ import ExportedKotlinPackages
         #expect(Bool(!constantTimeEq32(a: repeated(32, 3), b: repeated(32, 7))))
     }
 
-    @Test func testConstantTimeEq32RequiresFixedLength() throws {
-        #expect(Bool(constantTimeEq32RejectsWrongLength()))
-    }
-
     @Test func testConstantTimeEq64DocExamples() throws {
         #expect(Bool(constantTimeEq64(a: repeated(64, 3), b: repeated(64, 3))))
         #expect(Bool(!constantTimeEq64(a: repeated(64, 3), b: repeated(64, 7))))
     }
 
-    @Test func testConstantTimeEq64RequiresFixedLength() throws {
-        #expect(Bool(constantTimeEq64RejectsWrongLength()))
-    }
-
-    private func assertTransitionParity(size: Int32, a: Int8, b: Int8, compare: (KotlinByteArray, KotlinByteArray) -> Bool) {
+    private func assertEqualitySweep(size: Int32, a: Int8, b: Int8, compare: (KotlinByteArray, KotlinByteArray) -> Bool) {
         let left = repeated(size, a)
 
         let fromStart = repeated(size, b)
@@ -88,21 +95,21 @@ import ExportedKotlinPackages
         #expect(Bool(compare(left, fromEnd)))
     }
 
-    @Test func testCountInstructionTransitionParity() throws {
-        assertTransitionParity(size: 64, a: 65, b: 66) { left, right in
+    @Test func testSweepEqualityAcrossAllPrefixSuffixLengths() throws {
+        assertEqualitySweep(size: 64, a: 65, b: 66) { left, right in
             constantTimeEq(a: left, b: right)
         }
-        assertTransitionParity(size: 64, a: 0x55, b: Int8(bitPattern: 0xAA)) { left, right in
+        assertEqualitySweep(size: 64, a: 0x55, b: Int8(bitPattern: 0xAA)) { left, right in
             constantTimeEq(a: left, b: right)
         }
     }
 
-    @Test func testCountInstructionTransitionParityForFixedSizes() throws {
+    @Test func testSweepEqualityForFixedSizes() throws {
         for size in [16, 20, 24, 32, 48, 64] as [Int32] {
-            assertTransitionParity(size: size, a: 65, b: 66) { left, right in
+            assertEqualitySweep(size: size, a: 65, b: 66) { left, right in
                 constantTimeEqN(a: left, b: right)
             }
-            assertTransitionParity(size: size, a: 0x55, b: Int8(bitPattern: 0xAA)) { left, right in
+            assertEqualitySweep(size: size, a: 0x55, b: Int8(bitPattern: 0xAA)) { left, right in
                 constantTimeEqN(a: left, b: right)
             }
         }

@@ -1,17 +1,26 @@
 package io.github.kotlinmania.constanttimeeq
 
+import kotlin.concurrent.atomics.AtomicInt
+
+private val optimizerHideZeroMask = AtomicInt(0)
+
 /**
- * Optimizer barrier preventing compiler optimizations from removing comparison operations.
+ * Best-effort optimization barrier preventing the compiler from constant-folding
+ * or short-circuiting comparisons before the zero check outside this function.
  *
- * Input value is passed through an optimization barrier so that constant propagation and folding
- * do not elide the calculation.
- *
- * The implementation keeps this function non-inlined to ensure that optimization passes
- * do not look inside this function.
+ * Upstream `lib.rs` uses inline `asm!` on x86/ARM/RISC-V and
+ * `#[inline(never)] core::hint::black_box(value)` on other targets and Miri.
+ * Portable Kotlin Multiplatform `commonMain` cannot emit raw inline assembly
+ * across JVM, ART, Native, JS, and Wasm backends, so this barrier XORs the
+ * masked byte with an `AtomicInt` load (`optimizerHideZeroMask`), which
+ * enforces an observable atomic/volatile load without mutating shared memory.
+ * Like Rust's `core::hint::black_box`, compiler and VM backends do not provide
+ * formal ISA-level constant-time execution guarantees.
  */
 internal fun optimizerHide(value: Byte): Byte {
     val masked = value.toInt() and 0xFF
-    return (masked xor 0).toByte()
+    val zeroMask = optimizerHideZeroMask.load()
+    return (masked xor zeroMask).toByte()
 }
 
 /**

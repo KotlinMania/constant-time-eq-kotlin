@@ -10,7 +10,7 @@ This is a Kotlin Multiplatform line-by-line transliteration port of [`cesarb/con
 
 ### Porting status
 
-This is an **in-progress port**. The goal is feature parity with the upstream Rust crate while providing a native Kotlin Multiplatform API. Every Kotlin file carries a `// port-lint: source <path>` header naming its upstream Rust counterpart so the AST-distance tool can track provenance.
+This is a **completed port** of `cesarb/constant_time_eq` to Kotlin Multiplatform. Focused Kotlin source and test files are organized under `io.github.kotlinmania.constanttimeeq` with `ConstantTimeEq.kt` matching upstream `src/lib.rs` behavior across all 17 retained KMP targets (while upstream Linux `ptrace`-based instruction counting and Criterion benchmarks remain documented as unportable per `AGENTS.md` §6).
 
 ---
 
@@ -38,7 +38,7 @@ at your option.
 
 ```kotlin
 dependencies {
-    implementation("io.github.kotlinmania:constant-time-eq-kotlin:0.1.1")
+    implementation("io.github.kotlinmania:constant-time-eq-kotlin:0.1.2")
 }
 ```
 
@@ -47,23 +47,21 @@ dependencies {
 ```bash
 ./gradlew build
 ./gradlew test
-./gradlew swiftExportTest
 ```
 
 ### Targets
 
-- macOS arm64
-- Linux x64
-- Windows mingw-x64
-- iOS arm64 / simulator-arm64 (Swift export + XCFramework)
-- JS (browser + Node.js)
-- Wasm-JS (browser + Node.js)
-- Android (API 24+)
+- JVM & Android (API 24+)
+- Android Native (`androidNativeArm64`, `androidNativeX64`)
+- Apple (`macosArm64`, `iosArm64`, `iosSimulatorArm64`, `tvosArm64`, `tvosSimulatorArm64`, `watchosDeviceArm64`, `watchosSimulatorArm64`) + Swift Export (`ConstantTimeEq`)
+- Linux (`linuxX64`, `linuxArm64`)
+- Windows (`mingwX64`)
+- JS & Wasm (`js`, `wasmJs`, `wasmWasi`)
 
 ### Porting guidelines
 
-See [AGENTS.md](AGENTS.md) and [CLAUDE.md](CLAUDE.md) for translator discipline, port-lint header convention, and Rust → Kotlin idiom mapping.
-Keep the upstream Rust checkout in `tmp/constant_time_eq/` (gitignored) as the translation ground truth.
+See [AGENTS.md](AGENTS.md) for translator discipline and Rust → Kotlin idiom mapping.
+Keep the upstream Rust checkout in `tmp/constant_time_eq/` as the translation ground truth.
 
 ### License
 

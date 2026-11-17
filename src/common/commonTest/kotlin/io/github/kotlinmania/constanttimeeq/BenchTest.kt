@@ -5,6 +5,7 @@ import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+// Unported Criterion throughput timing harness from benches/bench.rs: Criterion statistical benchmarking is outside unit test scope; this class verifies functional equivalence across the same input sizes.
 class BenchTest {
     @Test
     fun benchArrayEquivalence() {
@@ -21,7 +22,7 @@ class BenchTest {
 
     @Test
     fun benchSliceEquivalence() {
-        val sizes = intArrayOf(16, 20, 32, 64, 4 * 1024, 16 * 1024)
+        val sizes = intArrayOf(16, 20, 32, 64, 4 * 1024, 16 * 1024, 64 * 1024)
         for (size in sizes) {
             val a = ByteArray(size) { 1 }
             val b = ByteArray(size) { 2 }
