@@ -1,4 +1,4 @@
-=== Deep Analysis: tmp/constant_time_eq/src (rust) -> src/commonMain/kotlin/io/github/kotlinmania/constanttimeeq (kotlin) ===
+=== Deep Analysis: tmp/constant_time_eq/src (rust) -> src/common/commonMain/kotlin/io/github/kotlinmania/constanttimeeq (kotlin) ===
 
 Scanning source codebase (rust)...
 Codebase: tmp/constant_time_eq/src (rust)
@@ -6,7 +6,7 @@ Codebase: tmp/constant_time_eq/src (rust)
   Total imports: 2
 
 Scanning target codebase (kotlin)...
-Codebase: src/commonMain/kotlin/io/github/kotlinmania/constanttimeeq (kotlin)
+Codebase: src/common/commonMain/kotlin/io/github/kotlinmania/constanttimeeq (kotlin)
   Files: 5
   Total imports: 12
 
@@ -16,7 +16,7 @@ Computing AST similarities...
 === Codebase Comparison Report ===
 
 Source: tmp/constant_time_eq/src (1 files)
-Target: src/commonMain/kotlin/io/github/kotlinmania/constanttimeeq (5 files)
+Target: src/common/commonMain/kotlin/io/github/kotlinmania/constanttimeeq (5 files)
 Scoring invariant: FnSim is required function body/parameter similarity. Class/type and symbol parity are reported beside it; whole-file shape is diagnostic only.
 
 Matched:   0 files
